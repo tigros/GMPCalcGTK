@@ -13,3 +13,6 @@ Also, install included gtk-sharp-2.12.45.msi on Windows.
 
 
 ![alt screenshot](https://raw.githubusercontent.com/tigros/GMPCalcGTK/master/screenshot.jpg)
+
+Credits to GMP and MPFR developers! Also Robert Baron (MachineCognitis) for his .Net libraries, which I've modified somewhat.
+
