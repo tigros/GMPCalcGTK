@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<stetic-interface>
+  <configuration>
+    <images-root-path>..</images-root-path>
+  </configuration>
+  <import>
+    <widget-library name="glade-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <widget-library name="../bin/Debug/GMPCalcGTK.exe" internal="true" />
+  </import>
+  <widget class="Gtk.Window" id="MainWindow" design-size="800 450">
+    <property name="MemberName" />
+    <property name="WidthRequest">745</property>
+    <property name="HeightRequest">450</property>
+    <property name="Title" translatable="yes">GMP Calc</property>
+    <property name="WindowPosition">CenterOnParent</property>
+    <property name="Resizable">False</property>
+    <property name="AllowGrow">False</property>
+    <property name="Gravity">Static</property>
+    <signal name="DeleteEvent" handler="OnDeleteEvent" />
+    <child>
+      <widget class="Gtk.Frame" id="frame1">
+        <property name="MemberName" />
+        <property name="ShadowType">None</property>
+        <child>
+          <widget class="Gtk.Alignment" id="GtkAlignment">
+            <property name="MemberName" />
+            <property name="Xalign">0</property>
+            <property name="Yalign">0</property>
+            <property name="LeftPadding">12</property>
+            <child>
+              <widget class="Gtk.Fixed" id="fixed1">
+                <property name="MemberName" />
+                <property name="HasWindow">False</property>
+                <child>
+                  <widget class="Gtk.ScrolledWindow" id="GtkScrolledWindow">
+                    <property name="MemberName" />
+                    <property name="ShadowType">In</property>
+                    <child>
+                      <widget class="Gtk.TextView" id="textview1">
+                        <property name="MemberName" />
+                        <property name="WidthRequest">700</property>
+                        <property name="HeightRequest">130</property>
+                        <property name="CanFocus">True</property>
+                        <property name="ShowScrollbars">True</property>
+                        <property name="Text" translatable="yes">(4 * atan(x / 5) - atan(y / 239)) * 4</property>
+                        <property name="WrapMode">WordChar</property>
+                      </widget>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="X">5</property>
+                    <property name="Y">13</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder />
+                </child>
+                <child>
+                  <widget class="Gtk.ScrolledWindow" id="GtkScrolledWindow1">
+                    <property name="MemberName" />
+                    <property name="ShadowType">In</property>
+                    <child>
+                      <widget class="Gtk.TextView" id="textview2">
+                        <property name="MemberName" />
+                        <property name="WidthRequest">700</property>
+                        <property name="HeightRequest">150</property>
+                        <property name="CanFocus">True</property>
+                        <property name="ShowScrollbars">True</property>
+                        <property name="Editable">False</property>
+                        <property name="Text" translatable="yes" />
+                        <property name="WrapMode">WordChar</property>
+                      </widget>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="X">5</property>
+                    <property name="Y">168</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Label" id="xlabel">
+                    <property name="MemberName" />
+                    <property name="LabelProp" translatable="yes">x =</property>
+                  </widget>
+                  <packing>
+                    <property name="X">525</property>
+                    <property name="Y">340</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Label" id="ylabel">
+                    <property name="MemberName" />
+                    <property name="LabelProp" translatable="yes">y =</property>
+                  </widget>
+                  <packing>
+                    <property name="X">525</property>
+                    <property name="Y">370</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Label" id="zlabel">
+                    <property name="MemberName" />
+                    <property name="LabelProp" translatable="yes">z =</property>
+                  </widget>
+                  <packing>
+                    <property name="X">525</property>
+                    <property name="Y">400</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.TextView" id="xtext">
+                    <property name="MemberName" />
+                    <property name="WidthRequest">150</property>
+                    <property name="HeightRequest">20</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Text" translatable="yes">1</property>
+                    <property name="WrapMode">WordChar</property>
+                  </widget>
+                  <packing>
+                    <property name="X">555</property>
+                    <property name="Y">340</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.TextView" id="ytext">
+                    <property name="MemberName" />
+                    <property name="WidthRequest">150</property>
+                    <property name="HeightRequest">20</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Text" translatable="yes">1</property>
+                    <property name="WrapMode">WordChar</property>
+                  </widget>
+                  <packing>
+                    <property name="X">555</property>
+                    <property name="Y">370</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.TextView" id="ztext">
+                    <property name="MemberName" />
+                    <property name="WidthRequest">150</property>
+                    <property name="HeightRequest">20</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Text" translatable="yes">1</property>
+                    <property name="WrapMode">WordChar</property>
+                  </widget>
+                  <packing>
+                    <property name="X">555</property>
+                    <property name="Y">400</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Button" id="button1">
+                    <property name="MemberName" />
+                    <property name="WidthRequest">100</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Events">ButtonPressMask</property>
+                    <property name="Type">TextOnly</property>
+                    <property name="Label" translatable="yes">Clear</property>
+                    <property name="UseUnderline">True</property>
+                    <signal name="Clicked" handler="clearbuttonclicked" />
+                  </widget>
+                  <packing>
+                    <property name="X">354</property>
+                    <property name="Y">407</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Button" id="button4">
+                    <property name="MemberName" />
+                    <property name="WidthRequest">100</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Events">ButtonPressMask</property>
+                    <property name="Type">TextOnly</property>
+                    <property name="Label" translatable="yes">=</property>
+                    <property name="UseUnderline">True</property>
+                    <signal name="Clicked" handler="apress" />
+                  </widget>
+                  <packing>
+                    <property name="X">230</property>
+                    <property name="Y">407</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Label" id="timertext">
+                    <property name="MemberName" />
+                    <property name="LabelProp" translatable="yes">0 ms</property>
+                  </widget>
+                  <packing>
+                    <property name="X">19</property>
+                    <property name="Y">414</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Label" id="label2">
+                    <property name="MemberName" />
+                    <property name="LabelProp" translatable="yes">Print precision:</property>
+                  </widget>
+                  <packing>
+                    <property name="X">5</property>
+                    <property name="Y">370</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Label" id="label1">
+                    <property name="MemberName" />
+                    <property name="LabelProp" translatable="yes">Calc precision:</property>
+                  </widget>
+                  <packing>
+                    <property name="X">5</property>
+                    <property name="Y">340</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.TextView" id="calcprec">
+                    <property name="MemberName" />
+                    <property name="WidthRequest">100</property>
+                    <property name="HeightRequest">20</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Text" translatable="yes">10005</property>
+                  </widget>
+                  <packing>
+                    <property name="X">113</property>
+                    <property name="Y">340</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.TextView" id="printprec">
+                    <property name="MemberName" />
+                    <property name="WidthRequest">100</property>
+                    <property name="HeightRequest">20</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Text" translatable="yes">10000</property>
+                  </widget>
+                  <packing>
+                    <property name="X">113</property>
+                    <property name="Y">370</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.CheckButton" id="digitgrp">
+                    <property name="MemberName" />
+                    <property name="CanFocus">True</property>
+                    <property name="Events">ButtonPressMask</property>
+                    <property name="Label" translatable="yes">Digit grouping</property>
+                    <property name="Active">True</property>
+                    <property name="DrawIndicator">True</property>
+                    <property name="HasLabel">True</property>
+                    <property name="UseUnderline">True</property>
+                    <signal name="Toggled" handler="digitgrpchanged" />
+                  </widget>
+                  <packing>
+                    <property name="X">250</property>
+                    <property name="Y">340</property>
+                  </packing>
+                </child>
+              </widget>
+            </child>
+          </widget>
+        </child>
+      </widget>
+    </child>
+  </widget>
+</stetic-interface>

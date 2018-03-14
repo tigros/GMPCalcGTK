@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GMPCalcGTK", "GMPCalcGTK\GMPCalcGTK.csproj", "{63FF21D4-5AB7-4721-96BA-CC6FCE9248E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Math.Gmp.Native", "Math.Gmp.Native\Math.Gmp.Native.csproj", "{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Math.Mpfr.Native", "Math.Mpfr.Native\Math.Mpfr.Native\Math.Mpfr.Native.csproj", "{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63FF21D4-5AB7-4721-96BA-CC6FCE9248E5}.Debug|x64.ActiveCfg = Debug|x64
+		{63FF21D4-5AB7-4721-96BA-CC6FCE9248E5}.Debug|x64.Build.0 = Debug|x64
+		{63FF21D4-5AB7-4721-96BA-CC6FCE9248E5}.Debug|x86.ActiveCfg = Debug|x86
+		{63FF21D4-5AB7-4721-96BA-CC6FCE9248E5}.Debug|x86.Build.0 = Debug|x86
+		{63FF21D4-5AB7-4721-96BA-CC6FCE9248E5}.Release|x64.ActiveCfg = Release|x64
+		{63FF21D4-5AB7-4721-96BA-CC6FCE9248E5}.Release|x64.Build.0 = Release|x64
+		{63FF21D4-5AB7-4721-96BA-CC6FCE9248E5}.Release|x86.ActiveCfg = Release|x86
+		{63FF21D4-5AB7-4721-96BA-CC6FCE9248E5}.Release|x86.Build.0 = Release|x86
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4A}.Debug|x64.ActiveCfg = Debug|x64
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4A}.Debug|x64.Build.0 = Debug|x64
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4A}.Debug|x86.ActiveCfg = Debug|x86
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4A}.Debug|x86.Build.0 = Debug|x86
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4A}.Release|x64.ActiveCfg = Release|x64
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4A}.Release|x64.Build.0 = Release|x64
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4A}.Release|x86.ActiveCfg = Release|x86
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4A}.Release|x86.Build.0 = Release|x86
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4C}.Debug|x64.ActiveCfg = Debug|x64
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4C}.Debug|x64.Build.0 = Debug|x64
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4C}.Debug|x86.ActiveCfg = Debug|x86
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4C}.Debug|x86.Build.0 = Debug|x86
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4C}.Release|x64.ActiveCfg = Release|x64
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4C}.Release|x64.Build.0 = Release|x64
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4C}.Release|x86.ActiveCfg = Release|x86
+		{145D16A4-B3B6-49C6-B0DD-E4E0A2A00E4C}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B25C47E8-0313-4715-AC9F-28F8A2A4F2E9}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = GMPCalcGTK\GMPCalc.csproj
+	EndGlobalSection
+EndGlobal

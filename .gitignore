@@ -1,0 +1,15 @@
+obj
+*~
+*.suo
+*.user
+*.dotCover
+*.pidb
+*.userprefs
+*.usertasks
+*.mdb
+.DS_Store
+test-results
+.nuget/
+packages/
+.vs/
+
