@@ -5,7 +5,9 @@ Tested Ubuntu, FreeBSD, MacOS and Windows.
 
 Windows binaries included in GMPCalcGTK\bin\x86\Debug
 
-Compilation note: be sure to select x86 since it's GTK.
+Compilation note: On Windows be sure to select x86 since it's GTK.
+
+Each OS needs respective symbol defined for GMP and MPFR projects using Build options/symbols: WINDOWS, LINUX, FREEBSD or MACOS
 
 Also, install included gtk-sharp-2.12.45.msi on Windows.
 
