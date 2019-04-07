@@ -1,3 +1,5 @@
 * text=auto
 
 *.cs     diff=csharp
+Math.Gmp.Native/* linguist-vendored
+Math.Mpfr.Native/* linguist-vendored
