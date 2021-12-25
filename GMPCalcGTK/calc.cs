@@ -781,28 +781,45 @@ namespace GMPCalc
             return cal;
         }
 
-        private string next3(string cal, int i)
-        {
-            string result;
-            try
-            {
-                result = cal.Substring(i + 1, 3);
-            }
-            catch
-            {
-                result = cal;
-            }
-            return result;
-        }
-
         private string dobrackets(ref string cal, ref int i)
         {
             return domuls(dopowers(dofuncs(getbrackets(ref cal, ref i))));
         }
 
+        private bool checkfunc(ref string cal, ref int i, ref StringBuilder temp, ref mpfr_t a, ref mpfr_t dst)
+        {
+            try
+            {
+                int count = 5;
+                if (i + 5 >= cal.Length)
+                    count = cal.Length - i - 1;
+                int bracket = cal.IndexOf('(', i + 1, count);
+
+                if (bracket == -1)
+                    return false;
+
+                string func = cal.Substring(i, bracket - i);
+
+                Globals.mpfr_delegate matchfunc = Globals.funcs[func];
+             
+                i += func.Length;
+
+                setgmp(ref a, dobrackets(ref cal, ref i));
+                matchfunc(dst, a, mpfr_rnd_t.MPFR_RNDN);
+                temp.Append(fstr(ref dst));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+            return false;
+        }
+
         private string dofuncs(string cal)
         {
-            if (!fnoerr())
+            if (!noerr)
                 return "0";
 
             int i = 0;
@@ -836,274 +853,6 @@ namespace GMPCalc
                             temp.Append(cal[i++]);
                             break;
 
-                        case 'S':  // sin, sqrt, sech, sinh, sec
-                            if ((n3 = next3(cal, i)) == "IN(")
-                            {
-                                i += 3;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_sin(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "QRT(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_sqrt(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "ECH(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_sech(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "INH(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_sinh(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (n3 == "EC(")
-                            {
-                                i += 3;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_sec(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-
-                            }
-                            else
-                            {
-                                error(cal, ref i);
-                            }
-                            break;
-
-                        case 'C':  // cos, cot, csc, cosh, coth, csch
-                            if ((n3 = next3(cal, i)) == "OS(")
-                            {
-                                i += 3;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_cos(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (n3 == "OT(")
-                            {
-                                i += 3;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_cot(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-
-                            }
-                            else if (n3 == "SC(")
-                            {
-                                i += 3;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_csc(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "OSH(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_cosh(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "OTH(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_coth(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "SCH(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_csch(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else
-                            {
-                                error(cal, ref i);
-                            }
-                            break;
-
-                        case 'T':  // tan, tanh
-                            if ((n3 = next3(cal, i)) == "AN(")
-                            {
-                                i += 3;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_tan(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "ANH(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_tanh(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 5 && n3 + cal[i + 4] + cal[i + 5] == "RUNC(")
-                            {
-                                i += 5;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_trunc(dst, a);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else
-                            {
-                                error(cal, ref i);
-                            }
-                            break;
-
-                        case 'A':  // atan, acosh, asinh, atanh, acos, asin, abs
-                            if ((n3 = next3(cal, i)) == "TAN" && len > i + 4 && cal[i + 4] == '(')
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_atan(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 5 && n3 + cal[i + 4] + cal[i + 5] == "COSH(")
-                            {
-                                i += 5;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_acosh(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 5 && n3 + cal[i + 4] + cal[i + 5] == "SINH(")
-                            {
-                                i += 5;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_asinh(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 5 && n3 + cal[i + 4] + cal[i + 5] == "TANH(")
-                            {
-                                i += 5;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_atanh(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "COS(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_acos(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "SIN(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_asin(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (n3 == "BS(")
-                            {
-                                i += 3;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_abs(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else
-                            {
-                                error(cal, ref i);
-                            }
-                            break;
-
-                        case 'L':  // log10, log2, log, ln
-                            if ((n3 = next3(cal, i)) == "OG1" && len > i + 5 && cal.Substring(i + 4, 2) == "0(")
-                            {
-                                i += 5;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_log10(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (len > i + 4 && n3 + cal[i + 4] == "OG2(")
-                            {
-                                i += 4;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_log2(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (n3 == "OG(")
-                            {
-                                i += 3;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_log(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else if (cal.Substring(i + 1, 2) == "N(")
-                            {
-                                i += 2;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_log(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else
-                            {
-                                error(cal, ref i);
-                            }
-                            break;
-
-                        case 'E':  // exp
-                            if ((n3 = next3(cal, i)) == "XP(")
-                            {
-                                i += 3;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_exp(dst, a, mpfr_rnd_t.MPFR_RNDN);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else
-                            {
-                                error(cal, ref i);
-                            }
-                            break;
-
-                        case 'R':
-                            if (len > i + 5 && next3(cal, i) + cal[i + 4] + cal[i + 5] == "OUND(")
-                            {
-                                i += 5;
-
-                                setgmp(ref a, dobrackets(ref cal, ref i));
-                                mpfr_lib.mpfr_round(dst, a);
-                                temp.Append(fstr(ref dst));
-                            }
-                            else
-                            {
-                                error(cal, ref i);
-                            }
-                            break;
-
                         case '0':
                         case '1':
                         case '2':
@@ -1127,11 +876,12 @@ namespace GMPCalc
                             break;
 
                         default:
-                            error(cal, ref i);
+                            if (!checkfunc(ref cal, ref i, ref temp, ref a, ref dst))
+                                error(cal, ref i);
                             break;
                     }
 
-                } while (i < len && fnoerr());
+                } while (i < len && noerr);
             }
             catch
             {
@@ -1142,7 +892,7 @@ namespace GMPCalc
 
             return temp.ToString();
         }
-
+        
         public string calc(string rcal, string x, string y, string z, string cp, string pp, bool dopretty)
         {
             string answer = "0";

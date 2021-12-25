@@ -1059,12 +1059,14 @@ namespace Math.Gmp.Native
         /// <param name="length">The number of bytes to fill with zeros.</param>
         public static void ZeroMemory(IntPtr dst, int length)
         {
+            #if WINDOWS
             SafeNativeMethods.RtlZeroMemory(dst, length);
+            #endif
         }
 
-        #endregion
+#endregion
 
-        #region "Random number routines."
+#region "Random number routines."
 
         /// <summary>
         /// Initialize <paramref name="state"/> with a default algorithm.
@@ -1539,9 +1541,9 @@ namespace Math.Gmp.Native
             return SafeNativeMethods.__gmp_urandomm_ui(state.ToIntPtr(), n);
         }
 
-        #endregion
+#endregion
 
-        #region "Formatted output routines."
+#region "Formatted output routines."
 
         /// <summary>
         /// Form a null-terminated string in a block of memory obtained from the current memory allocation function.
@@ -2211,9 +2213,9 @@ namespace Math.Gmp.Native
             return result;
         }
 
-        #endregion
+#endregion
 
-        #region "Formatted input routines."
+#region "Formatted input routines."
 
         /// <summary>
         /// Read from the stream <paramref name="fp"/>.
@@ -2666,9 +2668,9 @@ namespace Math.Gmp.Native
             return result;
         }
 
-        #endregion
+#endregion
 
-        #region "Integer (i.e. Z) routines."
+#region "Integer (i.e. Z) routines."
 
         /// <summary>
         /// Change the space for <paramref name="integer"/> to <paramref name="new_alloc"/> limbs.
@@ -12866,9 +12868,9 @@ namespace Math.Gmp.Native
             return x;
         }
 
-        #endregion
+#endregion
 
-        #region "Rational (i.e. Q) routines."
+#region "Rational (i.e. Q) routines."
 
         /// <summary>
         /// Set <paramref name="rop"/> to the absolute value of <paramref name="op"/>.
@@ -14896,9 +14898,9 @@ namespace Math.Gmp.Native
             SafeNativeMethods.__gmpq_swap(rop1.ToIntPtr(), rop2.ToIntPtr());
         }
 
-        #endregion
+#endregion
 
-        #region "Float (i.e. F) routines."
+#region "Float (i.e. F) routines."
 
         /// <summary>
         /// Set <paramref name="rop"/> to | <paramref name="op"/> |.
@@ -19104,9 +19106,9 @@ namespace Math.Gmp.Native
             SafeNativeMethods.__gmpf_urandomb(rop.ToIntPtr(), state.ToIntPtr(), nbits);
         }
 
-        #endregion
+#endregion
 
-        #region "Low level positive-integer (i.e. N) routines."
+#region "Low level positive-integer (i.e. N) routines."
 
         /// <summary>
         /// Add {<paramref name="s1p"/>, <paramref name="s1n"/>} and {<paramref name="s2p"/>, <paramref name="s2n"/>}, and write the <paramref name="s1n"/> least significant limbs of the result to <paramref name="rp"/>.
@@ -23766,7 +23768,7 @@ namespace Math.Gmp.Native
             return new mp_size_t(SafeNativeMethods.__gmpn_sec_invert_itch(n));
         }
 
-        #endregion
+#endregion
 
         [SuppressUnmanagedCodeSecurity]
         private static class SafeNativeMethods
@@ -23779,7 +23781,7 @@ namespace Math.Gmp.Native
             const string LIB_LIBDL_OR_LIBC = "libdl.dylib";
 #endif
 
-            #region "Win32 functions."
+#region "Win32 functions."
 
 #if WINDOWS
             [DllImport("kernel32", CharSet = CharSet.Unicode)]
@@ -23812,9 +23814,9 @@ namespace Math.Gmp.Native
             public static extern unsafe IntPtr dlerror();
 #endif
 
-            #endregion
+#endregion
 
-            #region "Memory allocation functions."
+#region "Memory allocation functions."
 
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe void __gmp_get_memory_functions(ref IntPtr /*void*(**) (size_t)*/ alloc_func_ptr, ref IntPtr /*void*(**) (void*, size_t, size_t)*/ realloc_func_ptr, ref IntPtr /*void (**) (void*, size_t)*/ free_func_ptr);
@@ -23822,9 +23824,9 @@ namespace Math.Gmp.Native
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe void __gmp_set_memory_functions(IntPtr /*void*(*) (size_t)*/ alloc_func_ptr, IntPtr /*void*(*) (void*, size_t, size_t)*/ realloc_func_ptr, IntPtr /*void (*) (void*, size_t)*/ free_func_ptr);
 
-            #endregion
+#endregion
 
-            #region "Random number routines."
+#region "Random number routines."
 
             ///* obsolete */
             //[DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
@@ -23860,9 +23862,9 @@ namespace Math.Gmp.Native
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe uint /*unsigned long int*/ __gmp_urandomm_ui(IntPtr /*gmp_randstate_t*/ state, uint /*unsigned long int*/ n);
 
-            #endregion
+#endregion
 
-            #region "Formatted output routines."
+#region "Formatted output routines."
 
             //#define gmp_asprintf __gmp_asprintf
             //__GMP_DECLSPEC int gmp_asprintf (char **, const char *, ...);
@@ -23909,9 +23911,9 @@ namespace Math.Gmp.Native
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe int __gmp_vsprintf(IntPtr /*char **/ buf, /*const*/ IntPtr /*char **/ fmt, IntPtr /*va_list*/ args);
 
-            #endregion
+#endregion
 
-            #region "Formatted input routines."
+#region "Formatted input routines."
 
             //#define gmp_fscanf __gmp_fscanf
             //# ifdef _GMP_H_HAVE_FILE
@@ -23933,9 +23935,9 @@ namespace Math.Gmp.Native
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe int __gmp_vsscanf(/*const*/ IntPtr /*char **/ s, /*const*/ IntPtr /*char **/ fmt, IntPtr /*va_list*/ ap);
 
-            #endregion
+#endregion
 
-            #region "Integer (i.e. Z) routines."
+#region "Integer (i.e. Z) routines."
 
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe void_ptr /*void **/ __gmpz_realloc(IntPtr /*mpz_t*/ integer, int /*mp_size_t*/ new_alloc);
@@ -24442,9 +24444,9 @@ namespace Math.Gmp.Native
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe /*const*/ IntPtr /*mpz_t*/ __gmpz_roinit_n(IntPtr /*mpz_t*/ x, /*const*/ IntPtr /*mp_limb_t*/ xp, int /*mp_size_t*/ xs);
 
-            #endregion
+#endregion
 
-            #region "Rational (i.e. Q) routines."
+#region "Rational (i.e. Q) routines."
 
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe void __gmpq_abs(IntPtr /*mpq_t*/ rop, /*const*/ IntPtr /*mpq_t*/ op);
@@ -24557,9 +24559,9 @@ namespace Math.Gmp.Native
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe void __gmpq_swap(IntPtr /*mpq_t*/ rop1, IntPtr /*mpq_t*/ rop2);
 
-            #endregion
+#endregion
 
-            #region "Float (i.e. F) routines."
+#region "Float (i.e. F) routines."
 
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe void __gmpf_abs(IntPtr /*mpf_t*/ rop, /*const*/ IntPtr /*mpf_t*/ op);
@@ -24777,9 +24779,9 @@ namespace Math.Gmp.Native
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe void __gmpf_urandomb(IntPtr /*mpf_t*/ rop, IntPtr /*gmp_randstate_t*/ state, uint /*mp_bitcnt_t*/ nbits);
 
-            #endregion
+#endregion
 
-            #region "Low level positive-integer (i.e. N) routines."
+#region "Low level positive-integer (i.e. N) routines."
 
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl, EntryPoint = "__gmpn_add")]
             public static extern unsafe uint /*mp_limb_t*/ __gmpn_add_x86(IntPtr /*mp_ptr*/ rp, /*const*/ IntPtr /*mp_ptr*/ s1p, int /*mp_size_t*/ s1n, /*const*/ IntPtr /*mp_ptr*/ s2p, int /*mp_size_t*/ s2n);
@@ -25099,7 +25101,7 @@ namespace Math.Gmp.Native
             [DllImport(LIB_GMP_PATH, CallingConvention = CallingConvention.Cdecl)]
             public static extern unsafe int /*mp_size_t*/ __gmpn_sec_invert_itch(int /*mp_size_t*/ n);
 
-            #endregion
+#endregion
 
         }
 

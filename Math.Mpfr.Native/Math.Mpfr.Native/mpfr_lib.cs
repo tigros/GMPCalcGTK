@@ -14186,6 +14186,16 @@ namespace Math.Mpfr.Native
             return SafeNativeMethods.mpfr_trunc(rop.ToIntPtr(), op.ToIntPtr());
         }
 
+        public static int mpfr_trunc(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+        {
+            return mpfr_trunc(rop, op);
+        }
+
+        public static int mpfr_round(mpfr_t rop, mpfr_t op, mpfr_rnd_t rnd)
+        {
+            return mpfr_round(rop, op);
+        }
+
         /// <summary>
         /// Set <paramref name="rop"/> to <paramref name="op"/> rounded to the next higher or equal representable integer (like <see cref="mpfr_rint"/> with <see cref="mpfr_rnd_t.MPFR_RNDU"/>).
         /// </summary>

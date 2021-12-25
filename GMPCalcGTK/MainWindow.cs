@@ -1,8 +1,7 @@
 ﻿using System;
-using Gtk;
-using System.Collections;
-using GMPCalc;
 using System.Runtime.Remoting.Messaging;
+using GMPCalc;
+using Gtk;
 
 public partial class MainWindow : Gtk.Window
 {
