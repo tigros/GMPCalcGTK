@@ -1,6 +1,6 @@
 ﻿// GMP Calc is free software, you may use/copy/modify as you decide.
 //
-// Provided by IntegriTech.ca. 2013/01/17
+// Provided by IntegriTech.ca. 2022/03/08
 // Written by Colin Lamarre, colin@integritech.ca
 //
 // Many Thanks to GMP, MPIR and MPFR teams! Incredible!
@@ -15,11 +15,14 @@
 //	
 //	  MPFR in .NET http://mpfr.codeplex.com/
 //
+// Changes:
+//    2022/03/08 Changed it to use StringBuilder instead of string in order to handle huge lists of numbers in reasonable time.
+//    2021/12/22 Improved dofuncs. Added support for Intel i9.
 
-using Math.Mpfr.Native;
 using System;
 using System.Collections;
 using System.Text;
+using Math.Mpfr.Native;
 
 namespace GMPCalc
 {
@@ -31,11 +34,12 @@ namespace GMPCalc
         private ArrayList plusminus = new ArrayList(new char[] { '+', '-' });
         private ArrayList pmmd = new ArrayList(new char[] { '+', '-', '*', '/' });
 
+        StringBuilder zerosb = new StringBuilder("0");
         uint precision;
         string printprec;
         string calcprec;
 
-        private void error(string cal, ref int i)
+        private void error(ref StringBuilder cal, ref int i)
         {
             string s = "";
 
@@ -55,30 +59,28 @@ namespace GMPCalc
             i = cal.Length;
         }
 
-        private bool clean(ref string toupper)
+        private bool clean(ref StringBuilder toupper)
         {
             bool result;
             int l = 0;
             int r = 0;
             string s;
-            StringBuilder t = new StringBuilder();
 
-            toupper = toupper.Trim().Replace("\n", "").Replace("\r", "").Replace("\t", "").Replace(",", "");
+            toupper.Replace("\n", "").Replace("\r", "").Replace("\t", "").Replace(",", "").Replace(" ", "");
 
             noerr = true;
 
             int len = toupper.Length;
+            StringBuilder t = new StringBuilder(len);
 
             for (int i = 0; i < len; i++)
             {
-                if (toupper[i] != ' ')
-                {
-                    t.Append(Char.ToUpper(toupper[i]));
-                    if (toupper[i] == '(')
-                        l++;
-                    else if (toupper[i] == ')')
-                        r++;
-                }
+                char c = toupper[i];
+                t.Append(Char.ToUpper(c));
+                if (c == '(')
+                    l++;
+                else if (c == ')')
+                    r++;
             }
 
             if (r != l)
@@ -88,17 +90,16 @@ namespace GMPCalc
             }
             else
             {
-                s = t.ToString();
-                if (s == "")
-                    toupper = "0";
+                if (t.Length == 0)
+                    toupper = zerosb;
                 else
-                    toupper = s;
+                    toupper = t;
                 result = true;
             }
             return result;
         }
 
-        private bool subxyz(ref string rcal, string x, string y, string z)
+        private bool subxyz(ref StringBuilder rcal, string x, string y, string z)
         {
             char[] xyz = new char[] { 'X', 'Y', 'Z', ')' };
             char[] mulchrs = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '(', 'X', 'Y', 'Z' };
@@ -112,46 +113,47 @@ namespace GMPCalc
             ArrayList digs = new ArrayList(noteuler2);
             ArrayList nums = new ArrayList(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
 
-            string s;
+            rcal.Replace("EXP(", "QQQ("); // don't replace that X
 
-            s = rcal.Replace("EXP(", "QQQ("); // don't replace that X
+            rcal.Replace("X", "(" + x + ")");
+            rcal.Replace("Y", "(" + y + ")");
+            rcal.Replace("Z", "(" + z + ")");
 
-            s = s.Replace("X", "(" + x + ")");
-            s = s.Replace("Y", "(" + y + ")");
-            s = s.Replace("Z", "(" + z + ")");
+            bool ret = clean(ref rcal);
 
-            bool ret = clean(ref s);
+            if (!ret)
+                return ret;
 
-            s = s.Replace("EXP(", "QQQ(");
-            s = s.Replace("SEC(", "Q@@(");  // handle Euler's e
-            s = s.Replace("SECH(", "Q$$(");
+            rcal.Replace("EXP(", "QQQ(");
+            rcal.Replace("SEC(", "Q@@(");  // handle Euler's e
+            rcal.Replace("SECH(", "Q$$(");
 
-            if (ret)
+            // handle Euler's e
+            if (rcal.IndexOf('E') != -1)
             {
-                // handle Euler's e
-
-                StringBuilder eb = new StringBuilder();
+                int rcallen = rcal.Length;
+                StringBuilder eb = new StringBuilder(rcallen);
                 bool hit = false;
 
-                for (int k = 0; k < s.Length; k++)
-                {   // handle weird things like 3e4e5 
+                for (int k = 0; k < rcallen; k++)
+                {   // handle weird things like 3e4e5
                     if (hit)
                     {
                         eb.Append('W');
-                        while (k < s.Length - 1 && digs.Contains(s[++k]))
-                            eb.Append(s[k]);
+                        while (k < rcallen - 1 && digs.Contains(rcal[++k]))
+                            eb.Append(rcal[k]);
 
-                        if (!digs.Contains(s[k]))
-                            eb.Append(s[k]);
+                        if (!digs.Contains(rcal[k]))
+                            eb.Append(rcal[k]);
                     }
                     else
-                        eb.Append(s[k]);
+                        eb.Append(rcal[k]);
 
                     hit = false;
 
-                    if (k < s.Length - 2)
+                    if (k < rcallen - 2)
                     {
-                        string tmp = s.Substring(k, 3);
+                        string tmp = rcal.ToString(k, 3);
 
                         for (int i = 0; i < noteuler.Length && !hit; i++)
                             for (int j = 0; j < noteuler2.Length && !hit; j++)
@@ -161,7 +163,7 @@ namespace GMPCalc
 
                                     if (plusminus.Contains(noteuler2[j]))
                                     {
-                                        if (k < s.Length - 3 && nums.Contains(s[k + 3]))
+                                        if (k < rcallen - 3 && nums.Contains(rcal[k + 3]))
                                             hit1 = true;
                                     }
                                     else
@@ -172,19 +174,19 @@ namespace GMPCalc
 
                                         int k2 = (plusminus.Contains(noteuler2[j]) ? k + 4 : k + 3);
 
-                                        while (k2 < s.Length && nums.Contains(s[k2]))
+                                        while (k2 < rcallen && nums.Contains(rcal[k2]))
                                             k2++;
 
-                                        if (k2 == s.Length || s[k2] != '.')
+                                        if (k2 == rcallen || rcal[k2] != '.')
                                             hit = true;
                                     }
                                 }
                     }
                 }
 
-                s = eb.ToString();
+                rcal = eb;
 
-                if (s.IndexOf('E') != -1)
+                if (rcal.IndexOf('E') != -1)
                 {
                     mpfr_t e = new mpfr_t();
                     mpfr_lib.mpfr_init2(e, precision);
@@ -193,47 +195,44 @@ namespace GMPCalc
                     string es = fstr(ref e);
                     mpfr_lib.mpfr_clear(e);
 
-                    s = s.Replace("E", "(" + es + ")");
+                    rcal.Replace("E", "(" + es + ")");
                 }
 
-                s = s.Replace("W", "E");
-
-                if (s.IndexOf("PI") != -1)
-                {
-                    mpfr_t pi = new mpfr_t();
-                    mpfr_lib.mpfr_init2(pi, precision);
-                    mpfr_lib.mpfr_const_pi(pi, mpfr_rnd_t.MPFR_RNDN);
-                    string pis = fstr(ref pi);
-                    mpfr_lib.mpfr_clear(pi);
-
-                    s = s.Replace("PI", "(" + pis + ")");
-                }
-
-
-                // Handle xy, 2x, x2, x(2 + 1), etc, insert *
-
-                for (int i = 0; i < xyz.Length; i++)
-                    for (int j = 0; j < mulchrs.Length; j++)
-                    {
-                        s = s.Replace(xyz[i].ToString() + mulchrs[j].ToString(), xyz[i].ToString() + "*" + mulchrs[j].ToString());
-                    }
-
-                for (int i = 0; i < mulchrsrev.Length; i++)
-                    for (int j = 0; j < xyzrev.Length; j++)
-                    {
-                        s = s.Replace(mulchrsrev[i].ToString() + xyzrev[j].ToString(), mulchrsrev[i].ToString() + "*" + xyzrev[j].ToString());
-                    }
-
-                s = s.Replace("LOG2*(", "LOG2(");
-                s = s.Replace("LOG10*(", "LOG10(");
-                s = s.Replace(")(", ")*(");
+                rcal.Replace('W', 'E');
             }
 
-            s = s.Replace("QQQ(", "EXP(");
-            s = s.Replace("Q@@(", "SEC(");
-            s = s.Replace("Q$$(", "SECH(");
+            if (rcal.IndexOf("PI") != -1)
+            {
+                mpfr_t pi = new mpfr_t();
+                mpfr_lib.mpfr_init2(pi, precision);
+                mpfr_lib.mpfr_const_pi(pi, mpfr_rnd_t.MPFR_RNDN);
+                string pis = fstr(ref pi);
+                mpfr_lib.mpfr_clear(pi);
 
-            rcal = s;
+                rcal.Replace("PI", "(" + pis + ")");
+            }
+
+            // Handle xy, 2x, x2, x(2 + 1), etc, insert *
+
+            for (int i = 0; i < xyz.Length; i++)
+                for (int j = 0; j < mulchrs.Length; j++)
+                {
+                    rcal.Replace(xyz[i].ToString() + mulchrs[j].ToString(), xyz[i].ToString() + "*" + mulchrs[j].ToString());
+                }
+
+            for (int i = 0; i < mulchrsrev.Length; i++)
+                for (int j = 0; j < xyzrev.Length; j++)
+                {
+                    rcal.Replace(mulchrsrev[i].ToString() + xyzrev[j].ToString(), mulchrsrev[i].ToString() + "*" + xyzrev[j].ToString());
+                }
+
+            rcal.Replace("LOG2*(", "LOG2(");
+            rcal.Replace("LOG10*(", "LOG10(");
+            rcal.Replace(")(", ")*(");
+
+            rcal.Replace("QQQ(", "EXP(");
+            rcal.Replace("Q@@(", "SEC(");
+            rcal.Replace("Q$$(", "SECH(");
 
             return ret;
         }
@@ -249,6 +248,11 @@ namespace GMPCalc
         private string fstr(ref mpfr_t x)
         {
             return mpfr_lib.asprintf("%." + calcprec + "RG", x);
+        }
+
+        private StringBuilder fstrsb(ref mpfr_t x)
+        {
+            return new StringBuilder(mpfr_lib.asprintf("%." + calcprec + "RG", x));
         }
 
         private string fprn(ref mpfr_t x)
@@ -276,9 +280,9 @@ namespace GMPCalc
             return result;
         }
 
-        private string prevnum(ref string temp, int i)
+        private StringBuilder prevnum(ref StringBuilder temp, int i)
         {
-            string result;
+            StringBuilder result;
             int oldi = i;
 
             try
@@ -296,7 +300,7 @@ namespace GMPCalc
             return result;
         }
 
-        private int signs(ref string cal, ref int i)
+        private int signs(ref StringBuilder cal, ref int i)
         {
             int sign = 1;
 
@@ -308,15 +312,13 @@ namespace GMPCalc
                     i++;
                 }
                 else if (cal[i] == '+')
-                {
                     i++;
-                }
             } while (plusminus.Contains(cal[i]));
 
             return sign;
         }
 
-        private string nextnum(ref string cal, ref int i)
+        private StringBuilder nextnum(ref StringBuilder cal, ref int i)
         {
             int sign;
 
@@ -334,17 +336,17 @@ namespace GMPCalc
                     i++;
             }
 
-            string result = cal.Substring(start, i - start);
+            StringBuilder result = cal.Substring(start, i - start);
             setsign(ref result, sign);
 
             return result;
         }
 
-        private string getbrackets(ref string cal, ref int i)
+        private StringBuilder getbrackets(ref StringBuilder cal, ref int i)
         {
             int count = 1;
             int start = i + 1;
-            string t;
+            StringBuilder t;
 
             do
             {
@@ -372,13 +374,32 @@ namespace GMPCalc
             mpfr_lib.set_str(b, bstr, mpfr_rnd_t.MPFR_RNDN);
         }
 
-        private string doadd(ref string temp)
+        private void setgmp(ref mpfr_t a, StringBuilder astr)
+        {
+            mpfr_lib.set_str(a, astr.ToString(), mpfr_rnd_t.MPFR_RNDN);
+        }
+
+        private void set2gmp(ref mpfr_t a, ref mpfr_t b, StringBuilder astr, StringBuilder bstr)
+        {
+            mpfr_lib.set_str(a, astr.ToString(), mpfr_rnd_t.MPFR_RNDN);
+
+            mpfr_lib.set_str(b, bstr.ToString(), mpfr_rnd_t.MPFR_RNDN);
+        }
+
+        private void set2gmp(ref mpfr_t a, ref mpfr_t b, StringBuilder astr, string bstr)
+        {
+            mpfr_lib.set_str(a, astr.ToString(), mpfr_rnd_t.MPFR_RNDN);
+
+            mpfr_lib.set_str(b, bstr, mpfr_rnd_t.MPFR_RNDN);
+        }
+
+        private StringBuilder doadd(ref StringBuilder temp)
         {
             int i = 0;
-            string tot_s;
+            StringBuilder tot_s;
 
             if (!fnoerr())
-                return "0";
+                return zerosb;
 
             mpfr_t tot = new mpfr_t();
             mpfr_t b = new mpfr_t();
@@ -410,7 +431,7 @@ namespace GMPCalc
                 catch { }
             }
 
-            tot_s = fstr(ref tot);
+            tot_s = fstrsb(ref tot);
 
             mpfr_lib.mpfr_clears(tot, b, null);
 
@@ -428,14 +449,25 @@ namespace GMPCalc
             }
         }
 
-        private string domuls(string cal)
+        private void setsign(ref StringBuilder cal, int sign)
+        {
+            if (sign == -1)
+            {
+                if (cal[0] == '-')
+                    cal.Remove(0, 1);
+                else
+                    cal.Insert(0, "-");
+            }
+        }
+
+        private StringBuilder domuls(StringBuilder cal)
         {
             if (!fnoerr())
-                return "0";
+                return zerosb;
 
             int i = 0;
             int sign;
-            string temp = "";
+            StringBuilder temp = new StringBuilder();
             string s;
             int start;
             int len = cal.Length;
@@ -455,7 +487,7 @@ namespace GMPCalc
                 {
                     case '+':
                     case '-':
-                        temp = temp + cal[i++];
+                        temp.Append(cal[i++]);
                         hasplusminus = true;
                         break;
 
@@ -468,7 +500,7 @@ namespace GMPCalc
                             mpfr_lib.mpfr_mul(dst, a, b, mpfr_rnd_t.MPFR_RNDN);
                             s = fstr(ref dst);
                             setsign(ref s, sign);
-                            temp = temp + s;
+                            temp.Append(s);
                         }
                         else if (cal[i] == '(')
                         {
@@ -476,11 +508,11 @@ namespace GMPCalc
                             mpfr_lib.mpfr_mul(dst, a, b, mpfr_rnd_t.MPFR_RNDN);
                             s = fstr(ref dst);
                             setsign(ref s, sign);
-                            temp = temp + s;
+                            temp.Append(s);
                         }
                         else
                         {
-                            error(cal, ref i);
+                            error(ref cal, ref i);
                         }
                         break;
 
@@ -493,7 +525,7 @@ namespace GMPCalc
                             mpfr_lib.mpfr_div(dst, a, b, mpfr_rnd_t.MPFR_RNDN);
                             s = fstr(ref dst);
                             setsign(ref s, sign);
-                            temp = temp + s;
+                            temp.Append(s);
                         }
                         else if (cal[i] == '(')
                         {
@@ -501,11 +533,11 @@ namespace GMPCalc
                             mpfr_lib.mpfr_div(dst, a, b, mpfr_rnd_t.MPFR_RNDN);
                             s = fstr(ref dst);
                             setsign(ref s, sign);
-                            temp = temp + s;
+                            temp.Append(s);
                         }
                         else
                         {
-                            error(cal, ref i);
+                            error(ref cal, ref i);
                         }
                         break;
 
@@ -517,18 +549,18 @@ namespace GMPCalc
                             set2gmp(ref a, ref b, prevnum(ref temp, temp.Length - 1), nextnum(ref cal, ref i));
                             mpfr_lib.mpfr_fmod(dst, a, b, mpfr_rnd_t.MPFR_RNDN);
                             s = fstr(ref dst);
-                            temp = temp + s;
+                            temp.Append(s);
                         }
                         else if (cal[i] == '(')
                         {
                             set2gmp(ref a, ref b, prevnum(ref temp, temp.Length - 1), domuls(getbrackets(ref cal, ref i)));
                             mpfr_lib.mpfr_fmod(dst, a, b, mpfr_rnd_t.MPFR_RNDN);
                             s = fstr(ref dst);
-                            temp = temp + s;
+                            temp.Append(s);
                         }
                         else
                         {
-                            error(cal, ref i);
+                            error(ref cal, ref i);
                         }
                         break;
 
@@ -551,15 +583,15 @@ namespace GMPCalc
                             if ((cal[i - 1] == 'E') && plusminus.Contains(cal[i]))
                                 i++;
                         }
-                        temp = temp + cal.Substring(start, i - start);
+                        temp.Append(cal.ToString(start, i - start));
                         break;
 
                     case '(':
-                        temp = temp + domuls(getbrackets(ref cal, ref i));
+                        temp.Append(domuls(getbrackets(ref cal, ref i)).ToString());
                         break;
 
                     default:
-                        error(cal, ref i);
+                        error(ref cal, ref i);
                         break;
                 }
 
@@ -573,7 +605,7 @@ namespace GMPCalc
             return temp;
         }
 
-        private int fcnt(ref string cal, ref int i)
+        private int fcnt(ref StringBuilder cal, ref int i)
         {
             int j = 0;
 
@@ -584,13 +616,13 @@ namespace GMPCalc
             }
 
             i++;
-            cal = cal.Remove(i, j);
+            cal.Remove(i, j);
             return j;
         }
 
-        private string getprev(ref string cal, ref int i)
+        private StringBuilder getprev(ref StringBuilder cal, ref int i)
         {
-            string result;
+            StringBuilder result;
             int oldi;
             int count;
 
@@ -610,7 +642,7 @@ namespace GMPCalc
                 catch { }
 
                 result = cal.Substring(i + 1, oldi - i);
-                cal = cal.Remove(i + 1, oldi - i);
+                cal.Remove(i + 1, oldi - i);
             }
             else
             {
@@ -632,16 +664,16 @@ namespace GMPCalc
                 int j = i;
                 if (i < 0)
                     j = 0;
-                cal = cal.Remove(j, oldi - j + 1);
+                cal.Remove(j, oldi - j + 1);
                 i--;
             }
 
             return result;
         }
 
-        private string getnext(ref string cal, int i)
+        private StringBuilder getnext(ref StringBuilder cal, int i)
         {
-            string result;
+            StringBuilder result;
             int oldi;
             int sign;
             int count;
@@ -668,7 +700,7 @@ namespace GMPCalc
                 result = cal.Substring(start, i - start);
                 setsign(ref result, sign);
 
-                cal = cal.Remove(oldi, i - oldi);
+                cal.Remove(oldi, i - oldi);
             }
             else
             {
@@ -689,26 +721,26 @@ namespace GMPCalc
                 result = domuls(dopowers(result));
                 setsign(ref result, sign);
 
-                cal = cal.Remove(oldi, i - oldi + 1);
+                cal.Remove(oldi, i - oldi + 1);
             }
 
             return result;
         }
 
-        private string dopowers(string cal)
+        private StringBuilder dopowers(StringBuilder cal)
         {
             if (!fnoerr())
-                return "0";
+                return zerosb;
 
             int i;
             int c;
-            string x;
+            StringBuilder x;
             string f;
 
             i = cal.Length - 1;
 
             if (i == -1)
-                return "0";
+                return zerosb;
 
             mpfr_t a = new mpfr_t();
             mpfr_t b = new mpfr_t();
@@ -728,7 +760,7 @@ namespace GMPCalc
                         {
                             i--;
                             c = fcnt(ref cal, ref i);
-                            f = getprev(ref cal, ref i);
+                            f = getprev(ref cal, ref i).ToString();
 
                             for (int j = 1; j <= c && fnoerr(); j++)
                             {
@@ -740,11 +772,11 @@ namespace GMPCalc
 
                             mpfr_lib.mpfr_pow(dst, b, a, mpfr_rnd_t.MPFR_RNDN);
 
-                            cal = cal.Insert(i + 1, fstr(ref dst));
+                            cal.Insert(i + 1, fstr(ref dst));
                         }
                         else
                         {
-                            string z = getprev(ref cal, ref i);
+                            StringBuilder z = getprev(ref cal, ref i);
                             int j = i;
                             if (i < -1)
                                 j = -1;
@@ -753,20 +785,20 @@ namespace GMPCalc
 
                             mpfr_lib.mpfr_pow(dst, b, a, mpfr_rnd_t.MPFR_RNDN);
 
-                            cal = cal.Insert(j + 1, fstr(ref dst));
+                            cal.Insert(j + 1, fstr(ref dst));
 
                         }
                         break;
 
                     case '!':
                         c = fcnt(ref cal, ref i);
-                        f = getprev(ref cal, ref i);
+                        f = getprev(ref cal, ref i).ToString();
                         for (int j = 1; j <= c && fnoerr(); j++)
                         {
                             mpfr_lib.mpfr_fac_ui(a, fvalui(f), mpfr_rnd_t.MPFR_RNDN);
                             f = fstr(ref a);
                         }
-                        cal = cal.Insert(i + 1, f);
+                        cal.Insert(i + 1, f);
                         break;
 
                     default:
@@ -781,24 +813,26 @@ namespace GMPCalc
             return cal;
         }
 
-        private string dobrackets(ref string cal, ref int i)
+        private StringBuilder dobrackets(ref StringBuilder cal, ref int i)
         {
             return domuls(dopowers(dofuncs(getbrackets(ref cal, ref i))));
         }
 
-        private bool checkfunc(ref string cal, ref int i, ref StringBuilder temp, ref mpfr_t a, ref mpfr_t dst)
+        private bool checkfunc(ref StringBuilder cal, ref int i, ref StringBuilder temp, ref mpfr_t a, ref mpfr_t dst)
         {
             try
             {
                 int count = 5;
                 if (i + 5 >= cal.Length)
                     count = cal.Length - i - 1;
-                int bracket = cal.IndexOf('(', i + 1, count);
+
+                string cals = cal.ToString(i + 1, count);
+                int bracket = cals.IndexOf('(');
 
                 if (bracket == -1)
                     return false;
 
-                string func = cal.Substring(i, bracket - i);
+                string func = cal[i] + cals.Substring(0, bracket);
 
                 Globals.mpfr_delegate matchfunc = Globals.funcs[func];
              
@@ -817,10 +851,10 @@ namespace GMPCalc
             return false;
         }
 
-        private string dofuncs(string cal)
+        private StringBuilder dofuncs(StringBuilder cal)
         {
             if (!noerr)
-                return "0";
+                return zerosb;
 
             int i = 0;
             int start;
@@ -872,12 +906,12 @@ namespace GMPCalc
                                 if ((cal[i - 1] == 'E') && plusminus.Contains(cal[i]))
                                     i++;
                             }
-                            temp.Append(cal.Substring(start, i - start));
+                            temp.Append(cal.ToString(start, i - start));
                             break;
 
                         default:
                             if (!checkfunc(ref cal, ref i, ref temp, ref a, ref dst))
-                                error(cal, ref i);
+                                error(ref cal, ref i);
                             break;
                     }
 
@@ -885,17 +919,18 @@ namespace GMPCalc
             }
             catch
             {
-                error(cal, ref i);
+                error(ref cal, ref i);
             }
 
             mpfr_lib.mpfr_clears(a, dst, null);
 
-            return temp.ToString();
+            return temp;
         }
         
         public string calc(string rcal, string x, string y, string z, string cp, string pp, bool dopretty)
         {
-            string answer = "0";
+            StringBuilder answer;
+            string answerret = "";
 
             try
             {
@@ -904,20 +939,21 @@ namespace GMPCalc
                 calcprec = cp;
                 precision = (uint)(Convert.ToDouble(cp) * BITS_PER_DIGIT + 16.0);
                 printprec = pp;
+                StringBuilder sb = new StringBuilder(rcal);
 
-                if (clean(ref rcal) && subxyz(ref rcal, x, y, z))
+                if (clean(ref sb) && subxyz(ref sb, x, y, z))
                 {
-                    answer = domuls(dopowers(dofuncs(rcal)));
-                    //int err = gmp_lib.gmp_errno;
+
+                    answer = domuls(dopowers(dofuncs(sb)));
 
                     if (noerr)
                     {
                         mpfr_t a = new mpfr_t();
                         mpfr_lib.mpfr_init2(a, precision);
                         setgmp(ref a, answer);
-                        answer = fprn(ref a);
+                        answerret = fprn(ref a);
                         if (dopretty)
-                            GMPCalc.utils.pretty(ref answer);
+                            GMPCalc.utils.pretty(ref answerret);
                         mpfr_lib.mpfr_clear(a);
                     }
 
@@ -932,21 +968,70 @@ namespace GMPCalc
             }
 
             if (!noerr)
-                answer = errmsg;
+                answerret = errmsg;
 
             if (Globals.cancelled)
             {
-                answer = "Cancelled";
+                answerret = "Cancelled";
                 Globals.cancelled = false;
             }
 
-            return answer;
+            return answerret;
 
         }
 
         public string calc(string rcal)
         {
             return calc(rcal, "1", "1", "1", "10005", "10000", true);
+        }
+    }
+
+    public static class Extensions
+    {
+        public static StringBuilder Substring(this StringBuilder sb, int startindex, int count)
+        {
+            try
+            {
+                return new StringBuilder(sb.ToString(startindex, count));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return new StringBuilder();
+        }
+
+        public static int IndexOf(this StringBuilder sb, string value)
+        {
+            int index;
+            int length = value.Length;
+            int maxSearchLength = (sb.Length - length) + 1;
+
+            for (int i = 0; i < maxSearchLength; i++)
+            {
+                if (sb[i] == value[0])
+                {
+                    index = 1;
+                    while ((index < length) && (sb[i + index] == value[index]))
+                        ++index;
+
+                    if (index == length)
+                        return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public static int IndexOf(this StringBuilder sb, char value)
+        {
+            int maxSearchLength = sb.Length;
+
+            for (int i = 0; i < maxSearchLength; i++)
+                if (sb[i] == value)
+                    return i;
+
+            return -1;
         }
     }
 }
