@@ -296,7 +296,7 @@ namespace GMPCalc
             catch { }
 
             result = temp.Substring(i + 1, oldi - i);
-            temp = temp.Remove(i + 1, oldi - i);
+            temp.Remove(i + 1, oldi - i);
             return result;
         }
 
@@ -411,7 +411,7 @@ namespace GMPCalc
 
             int len = temp.Length;
 
-            while (++i < len)
+            while (++i < len && fnoerr())
             {
                 try
                 {
@@ -853,7 +853,7 @@ namespace GMPCalc
 
         private StringBuilder dofuncs(StringBuilder cal)
         {
-            if (!noerr)
+            if (!fnoerr())
                 return zerosb;
 
             int i = 0;
@@ -915,7 +915,7 @@ namespace GMPCalc
                             break;
                     }
 
-                } while (i < len && noerr);
+                } while (i < len && fnoerr());
             }
             catch
             {
