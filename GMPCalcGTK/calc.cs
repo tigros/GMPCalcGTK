@@ -61,22 +61,18 @@ namespace GMPCalc
 
         private bool clean(ref StringBuilder toupper)
         {
-            bool result;
+            bool result = true;
             int l = 0;
             int r = 0;
-            string s;
 
             toupper.Replace("\n", "").Replace("\r", "").Replace("\t", "").Replace(",", "").Replace(" ", "");
 
             noerr = true;
 
             int len = toupper.Length;
-            StringBuilder t = new StringBuilder(len);
-
             for (int i = 0; i < len; i++)
             {
-                char c = toupper[i];
-                t.Append(Char.ToUpper(c));
+                char c = toupper[i] = Char.ToUpper(toupper[i]);
                 if (c == '(')
                     l++;
                 else if (c == ')')
@@ -88,14 +84,9 @@ namespace GMPCalc
                 errmsg = "Unbalanced brackets!";
                 noerr = result = false;
             }
-            else
-            {
-                if (t.Length == 0)
-                    toupper = zerosb;
-                else
-                    toupper = t;
-                result = true;
-            }
+            else if (toupper.Length == 0)
+                toupper = zerosb;
+
             return result;
         }
 
