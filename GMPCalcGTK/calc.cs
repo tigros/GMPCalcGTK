@@ -142,7 +142,7 @@ namespace GMPCalc
 
                     hit = false;
 
-                    if (k < rcallen - 2)
+                    if (k < rcallen - 2 && rcal[k + 1] == 'E')
                     {
                         string tmp = rcal.ToString(k, 3);
 
