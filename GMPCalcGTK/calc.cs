@@ -144,11 +144,12 @@ namespace GMPCalc
 
                     if (k < rcallen - 2 && rcal[k + 1] == 'E')
                     {
-                        string tmp = rcal.ToString(k, 3);
+                        char ch1 = rcal[k];
+                        char ch2 = rcal[k + 2];
 
                         for (int i = 0; i < noteuler.Length && !hit; i++)
                             for (int j = 0; j < noteuler2.Length && !hit; j++)
-                                if (tmp == noteuler[i].ToString() + "E" + noteuler2[j].ToString())
+                                if (ch1 == noteuler[i] && ch2 == noteuler2[j])
                                 {
                                     bool hit1 = false;
 
